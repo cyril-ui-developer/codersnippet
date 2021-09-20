@@ -11,12 +11,7 @@ import (
 
 func (app *application) home(w http.ResponseWriter, r *http.Request){
 
-	if r.URL.Path != "/"{
-		app.notFound(w)
-		return
-	}
 
-    panic("oops! something went wrong") 
 	s, err := app.snippets.Latest()
 	if err != nil {
 		app.serverError(w, err)
@@ -30,7 +25,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request){
 }
 
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request){
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	id, err := strconv.Atoi(r.URL.Query().Get(":id"))
 	if err != nil || id < 1 {
 		app.notFound(w)
 		return
@@ -49,18 +44,10 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request){
 }
 
 func (app *application) addSnippet(w http.ResponseWriter, r *http.Request){
-	w.Header().Set("Content-Type", "application/json")
-	w.Header()["Date"] = nil
-	w.Header()["X-XSS-Protection"] = []string{"1; mode=block"}
-	if r.Method != http.MethodPost {
-		w.Header().Set("Allow", http.MethodPost)
-		app.clientError(w, http.StatusMethodNotAllowed)
-		return
-	}
     
 	// Create some variables holding test data. 
-    title := "Hello world"
-    content := "Welcome to Hello World"
+    title := "Welcome to Cary"
+    content := "Welcome to Cary city"
     expires := "30"
 
 	id, err := app.snippets.Insert(title, content, expires)
@@ -68,5 +55,5 @@ func (app *application) addSnippet(w http.ResponseWriter, r *http.Request){
         app.serverError(w, err)
         return
     }
-    http.Redirect(w, r, fmt.Sprintf("/snippet?id=%d", id), http.StatusSeeOther)
+    http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
 }
