@@ -40,7 +40,7 @@ func (m *SnippetModel) Insert(title, content string, expires time.Time ) (int, e
 // This will return a specific snippet based on its id.
 func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
 	stmt := `SELECT id, title, content, created, expires FROM snippets
-    WHERE expires > UTC_TIMESTAMP() AND id = ?`
+    WHERE id = ?`
 
 	 // Use the QueryRow() method on the connection pool to execute our
     // SQL statement
@@ -74,7 +74,7 @@ func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
 // This will return the 10 most recently created snippets.
 func (m *SnippetModel) Latest() ([]*models.Snippet, error) {
 	stmt := `SELECT id, title, content, created, expires FROM snippets
-    WHERE expires > UTC_TIMESTAMP() ORDER BY created DESC LIMIT 10`
+    ORDER BY created DESC LIMIT 10`
     
 	 // Use the Query() method on the connection pool to execute our
     // SQL statement. 
