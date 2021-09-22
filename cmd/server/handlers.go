@@ -1,30 +1,39 @@
 package main
 
 import (
-	"fmt"
+//	"fmt"
 	"net/http"
 	"strconv"
 	"errors"
+	"encoding/json"
+	"io/ioutil"
+	
 
 	"github.com/cyril-ui-developer/codersnippet/pkg/models"
 )
 
+
 func (app *application) home(w http.ResponseWriter, r *http.Request){
-
-
+	
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	s, err := app.snippets.Latest()
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
-   
-	for _, snippet := range s {
-		fmt.Fprintf(w, "%v\n", snippet)
-	}
-	w.Write([]byte("Welcome to Coder Snippet"))
+	js, errs := json.Marshal(s)
+	if errs != nil {
+        app.errorLog.Println(errs)
+        http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
+        return
+    }
+	w.WriteHeader(http.StatusOK)
+	w.Write(js)
 }
 
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request){
+	
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	id, err := strconv.Atoi(r.URL.Query().Get(":id"))
 	if err != nil || id < 1 {
 		app.notFound(w)
@@ -40,20 +49,34 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request){
         }
         return
     }
-	fmt.Fprintf(w, "%v...", s)
+	js, errs := json.Marshal(s)
+	if errs != nil {
+        app.errorLog.Println(errs)
+        http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
+        return
+    }
+	w.WriteHeader(http.StatusOK)
+	w.Write(js)
 }
 
 func (app *application) addSnippet(w http.ResponseWriter, r *http.Request){
-    
-	// Create some variables holding test data. 
-    title := "Welcome to Cary"
-    content := "Welcome to Cary city"
-    expires := "30"
 
-	id, err := app.snippets.Insert(title, content, expires)
-    if err != nil {
-        app.serverError(w, err)
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	 var sp  models.Snippet
+	 json.Unmarshal(requestBody, &sp)
+
+	// Create some variables holding test data. 
+    title :=  sp.Title
+    content := sp.Content
+    expires :=  sp.Expires
+
+	_, erro := app.snippets.Insert(title, content, expires)
+    if erro != nil {
+        app.serverError(w, erro)
         return
     }
-    http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(sp)
 }

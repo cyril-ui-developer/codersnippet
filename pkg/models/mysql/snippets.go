@@ -3,6 +3,7 @@ package mysql
 import (
 	"errors"
     "database/sql"
+    "time"
 
     // Import the models package that we just created. You need to prefix this with 
     // whatever module path you set up back in chapter 02.02 (Project Setup and Enabling 
@@ -17,7 +18,7 @@ type SnippetModel struct {
 }
 
 // This will insert a new snippet into the database.
-func (m *SnippetModel) Insert(title, content, expires string) (int, error) {
+func (m *SnippetModel) Insert(title, content string, expires time.Time ) (int, error) {
 	
 	stmt := `INSERT INTO snippets (title, content, created, expires)
     VALUES(?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? DAY))`
