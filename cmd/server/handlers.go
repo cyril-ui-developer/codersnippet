@@ -1,12 +1,14 @@
 package main
 
 import (
-//	"fmt"
+	//"fmt"
 	"net/http"
 	"strconv"
 	"errors"
 	"encoding/json"
 	"io/ioutil"
+	"strings"
+	"unicode/utf8"
 	
 
 	"github.com/cyril-ui-developer/codersnippet/pkg/models"
@@ -71,12 +73,39 @@ func (app *application) addSnippet(w http.ResponseWriter, r *http.Request){
     title :=  sp.Title
     content := sp.Content
     expires :=  sp.Expires
+ 
+	// Initialize a map to hold any validation errors.
+	errors := make(map[string]string)
 
-	_, erro := app.snippets.Insert(title, content, expires)
+	if strings.TrimSpace(title) == "" {
+        errors["title"] = "This field cannot be blank"
+    } else if utf8.RuneCountInString(title) > 75 {
+        errors["title"] = "This field is too long (maximum is 75 characters)"
+    }
+    
+	// Check that the Content field isn't blank.
+    if strings.TrimSpace(content) == "" {
+        errors["content"] = "This field cannot be blank"
+    }else if utf8.RuneCountInString(title) > 250 {
+        errors["content"] = "This field is too long (maximum is 250 characters)"
+    }
+
+	js, errs := json.Marshal(errors)
+	if errs != nil {
+        app.errorLog.Println(errs)
+        http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
+        return
+    }
+	if len(errors) > 0 {
+		w.Write(js)
+        return
+    }
+
+	id, erro := app.snippets.Insert(title, content, expires)
     if erro != nil {
         app.serverError(w, erro)
         return
     }
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(sp)
+	json.NewEncoder(w).Encode(id)
 }
