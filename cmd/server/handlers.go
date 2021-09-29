@@ -1,7 +1,7 @@
 package main
 
 import (
-	//"fmt"
+	"fmt"
 	"net/http"
 	"strconv"
 	"errors"
@@ -9,7 +9,7 @@ import (
 	"io/ioutil"
 	"strings"
 	"unicode/utf8"
-	
+//	"golang.org/x/crypto/bcrypt" 
 
 	"github.com/cyril-ui-developer/codersnippet/pkg/models"
 )
@@ -108,4 +108,63 @@ func (app *application) addSnippet(w http.ResponseWriter, r *http.Request){
     }
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(id)
+}
+
+
+func (app *application) registerUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	
+	requestBody, _ := ioutil.ReadAll(r.Body)
+    keyVal := make(map[string]string)
+	 json.Unmarshal(requestBody, &keyVal)
+
+	// Create some variables holding test data. 
+    name :=  keyVal["name"]
+    email := keyVal["email"]
+    password := keyVal["password"]
+
+	err := app.users.Insert(name, email, password)
+	if err != nil {
+        if errors.Is(err, models.ErrDuplicateEmail) {
+		  fmt.Fprintln(w, "Email Address is already in use...")
+        } else {
+            app.serverError(w, err)
+        }
+        return
+    }
+    
+    fmt.Fprintln(w, "A new user created with username", email, "...")
+}
+
+
+func (app *application) loginUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	// var sp  models.User
+	// err := json.NewDecoder(r.Body).Decode(&sp)
+     requestBody, _ := ioutil.ReadAll(r.Body)
+     keyVal := make(map[string]string)
+	 json.Unmarshal(requestBody, &keyVal)
+
+	// Create some variables holding test data.  
+    email := keyVal["email"]
+    password := keyVal["password"]
+	
+	id, err := app.users.Authenticate(email, password)
+    if err != nil {
+        if errors.Is(err, models.ErrInvalidCredentials) {
+			fmt.Fprintln(w, "Email or Password is incorrect...")
+        } else {
+            app.serverError(w, err)
+        }
+        return
+    }
+// Add the ID of the current user to the session, so that they are now 'logged
+    app.session.Put(r, "authenticatedUserID", id)
+    fmt.Fprintln(w, "The user with ID", id, "is authenticated...")
+    fmt.Fprintln(w, "authenticatedUserID", id)
+}
+
+func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintln(w, "Logout the user...")
 }
