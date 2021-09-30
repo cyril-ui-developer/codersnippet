@@ -14,7 +14,7 @@ import (
 )
 
 
-func (app *application) home(w http.ResponseWriter, r *http.Request){
+func (app *application) listSnippets(w http.ResponseWriter, r *http.Request){
 	
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	s, err := app.snippets.Latest()
@@ -32,7 +32,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request){
 	w.Write(js)
 }
 
-func (app *application) showSnippet(w http.ResponseWriter, r *http.Request){
+func (app *application) getSnippet(w http.ResponseWriter, r *http.Request){
 	
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	id, err := strconv.Atoi(r.URL.Query().Get(":id"))

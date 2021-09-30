@@ -74,7 +74,7 @@ func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
 // This will return the 10 most recently created snippets.
 func (m *SnippetModel) Latest() ([]*models.Snippet, error) {
 	stmt := `SELECT id, title, content, created, expires FROM snippets
-    ORDER BY created DESC LIMIT 10`
+    ORDER BY created DESC LIMIT 100`
     
 	 // Use the Query() method on the connection pool to execute our
     // SQL statement. 
