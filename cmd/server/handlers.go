@@ -132,9 +132,9 @@ func (app *application) registerUser(w http.ResponseWriter, r *http.Request) {
         }
         return
     }
+  message := "A new account created for username:" + email
 
-  app.customServerMessage(w, "Success", `"A new account created for username:", email`)
-   // fmt.Fprintln(w, "A new user created with username", email, "...")
+  app.customServerMessage(w, "Success", message)
 }
 
 
@@ -162,8 +162,9 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request) {
     }
 // Add the ID of the current user to the session, so that they are now 'logged
     app.session.Put(r, "authenticatedUserID", id)
-    fmt.Fprintln(w, "The user with ID", id, "is authenticated...")
-    fmt.Fprintln(w, "authenticatedUserID", id)
+
+    message := "The user with ID:" + strconv.Itoa(id) + " is authenticated!"
+    app.customServerMessage(w, "Success", message)
 }
 
 func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
