@@ -106,7 +106,10 @@ func (app *application) addSnippet(w http.ResponseWriter, r *http.Request){
         return
     }
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(id)
+	//json.NewEncoder(w).Encode(id)
+    message := "A new snippet created. The snippet ID is: " + strconv.Itoa(id)
+
+    app.customServerMessage(w, "Success", message)
 }
 
 
@@ -168,7 +171,7 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-    
+
     app.session.Remove(r, "authenticatedUserID")
 
     app.customServerMessage(w, "Success", "You're logout")
