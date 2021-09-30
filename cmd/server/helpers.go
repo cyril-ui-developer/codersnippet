@@ -4,6 +4,9 @@ import (
     "fmt"
     "net/http"
     "runtime/debug"
+    "encoding/json"
+
+    "github.com/cyril-ui-developer/codersnippet/pkg/models"
 )
 
 func (app *application) serverError(w http.ResponseWriter, err error) {
@@ -22,3 +25,14 @@ func (app *application) notFound(w http.ResponseWriter) {
     app.clientError(w, http.StatusNotFound)
 }
 
+
+func (app *application) customServerMessage(w http.ResponseWriter, status , message string) {
+   
+    successMsg :=  models.Message{status, message}
+
+   jsMsg, msgErr := json.Marshal(successMsg)
+   if msgErr != nil{
+      app.serverError(w, msgErr)
+   }
+  w.Write(jsMsg)
+}

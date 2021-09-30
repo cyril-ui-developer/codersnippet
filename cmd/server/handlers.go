@@ -126,14 +126,15 @@ func (app *application) registerUser(w http.ResponseWriter, r *http.Request) {
 	err := app.users.Insert(name, email, password)
 	if err != nil {
         if errors.Is(err, models.ErrDuplicateEmail) {
-		  fmt.Fprintln(w, "Email Address is already in use...")
+          app.customServerMessage(w, "Failed", "Email Address is already in use!")
         } else {
             app.serverError(w, err)
         }
         return
     }
-    
-    fmt.Fprintln(w, "A new user created with username", email, "...")
+
+  app.customServerMessage(w, "Success", `"A new account created for username:", email`)
+   // fmt.Fprintln(w, "A new user created with username", email, "...")
 }
 
 
@@ -153,7 +154,7 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request) {
 	id, err := app.users.Authenticate(email, password)
     if err != nil {
         if errors.Is(err, models.ErrInvalidCredentials) {
-			fmt.Fprintln(w, "Email or Password is incorrect...")
+        app.customServerMessage(w, "Failed", "Email or Password is incorrect!")
         } else {
             app.serverError(w, err)
         }

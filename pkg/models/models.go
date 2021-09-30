@@ -31,11 +31,7 @@ type User struct {
     Active         bool
 }
 
-type UserTest struct {
-    ID             int `json:"id"`
-    Name           string `json:"name"`
-    Email          string `json:"email"`
-    HashedPassword string `json:"password"`
-    Created        time.Time 
-    Active         bool
+type Message struct {
+    Status         string `json:"status"`
+    Message        string `json:"message"`
 }
