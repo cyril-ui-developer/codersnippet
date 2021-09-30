@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"errors"
@@ -168,5 +167,9 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintln(w, "Logout the user...")
+    w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+    
+    app.session.Remove(r, "authenticatedUserID")
+
+    app.customServerMessage(w, "Success", "You're logout")
 }
