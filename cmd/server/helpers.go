@@ -36,3 +36,7 @@ func (app *application) customServerMessage(w http.ResponseWriter, status , mess
    }
   w.Write(jsMsg)
 }
+
+func (app *application) isAuthenticated(r *http.Request) bool {
+    return app.session.Exists(r, "authenticatedUserID")
+}
